@@ -1,7 +1,7 @@
 import random as rd # 블록을 랜덤으로 뽑기 위해서 사용하는 모듈
 
-background = "◼️"
-board = [[background for i in range(10)] for j in range(20)] # 10 X 20 보드판 생성
+background = "⚫" # 배경 타일
+board = [[background for i in range(10)] for j in range(21)] # 10 X 21 보드판 생성
 blockPos = [] # 블록의 각 픽셀이 위치하는 행과 열의 번호
 orgBlockPos = [] # 블록을 원점에 배치했을 때 각 픽셀이 위치하는 행과 열의 번호
 rotateCenterPos = () # 블록의 회전 중심이 되는 행과 열의 번호
@@ -11,48 +11,55 @@ blocks = [
     
     [["🛸", "🛸", "🛸", "🛸"]], # 일자 블록
     
-    [["👽", "👽", "◼️"], # Z블록
-     ["◼️", "👽", "👽"]],
+    [["👽", "👽", "⚫"], # Z블록
+     ["⚫", "👽", "👽"]],
     
-    [["◼️", "👾", "👾"], # Z블록 반전
-     ["👾", "👾", "◼️"]],
+    [["⚫", "👾", "👾"], # Z블록 반전
+     ["👾", "👾", "⚫"]],
     
-    [["🤔", "◼️", "◼️"], # ㄴ자 블록
+    [["🤔", "⚫", "⚫"], # ㄴ자 블록
      ["🤔", "🤔", "🤔"]],
     
-    [["◼️", "◼️", "🔫"], # ㄴ자 블록 반전
+    [["⚫", "⚫", "🔫"], # ㄴ자 블록 반전
      ["🔫", "🔫", "🔫"]],
 
-    [["◼️", "👻", "◼️"], # ㅗ자 블록
+    [["⚫", "👻", "⚫"], # ㅗ자 블록
      ["👻", "👻", "👻"]]
     ]
+score = 0 # 점수
+playable = True
 
 def update_board(): # 현재 보드판의 상태 출력
-    for i in board:
+    print("Score: %d" % (score))
+    for i in board[1:]:
         print(*i)
 
 def spawn_block():
-    global blockPos
-    global orgBlockPos
-    global rotateCenterPos
-    blockPos = []
-    orgBlockPos = []
-    randomBlock = rd.choice(blocks) # 블록 랜덤 선택
-    blockLen = len(randomBlock[0]) # 블록의 행 길이
-    place = int((len(board[0])-blockLen) / 2) # (보드의 행 길이 - 블록의 행 길이) / 2
-    prlDisplace = () # 평행이동 수치
-    for i in range(len(randomBlock)): # 블록의 행 조회
-        for j in range(len(randomBlock[i])): # 블록의 열 조회
-            if randomBlock[i][j] != background:
-                board[i][j+place] = randomBlock[i][j] # 블록의 각 행을 보드판 위쪽 가운데에 배치
-                blockPos.append((i, j+place)) # 배치된 행과 열의 번호를 blockPos에 저장
-                orgBlockPos.append((i, j)) # 원점에 배치했을 때 행과 열의 번호를 orgBlockPos에 저장
-                if i == len(randomBlock) // 2 and j == len(randomBlock[0]) // 2:
-                    rotateCenterPos = (i, j+place) # 블록의 행의 중심, 열의 중심 위치
-                    prlDisplace = (i, j) # 블록의 첫번째 행의 첫번째 열의 위치와 rotateCenterPos의 거리 차이
-    for i, pos in enumerate(orgBlockPos):
-        orgBlockPos[i] = (pos[0] - prlDisplace[0], pos[1] - prlDisplace[1]) # 블록을 원점에 배치했을 때, prlDisplace 만큼 평행이동하여
-                                                                            # 블록의 회전중심이 원점에 배치되도록 설정
+    if board[0].count(background) == 10: # 블록이 쌓인 칸 수가 20을 초과하지 않았으면
+        global blockPos
+        global orgBlockPos
+        global rotateCenterPos
+        blockPos = []
+        orgBlockPos = []
+        randomBlock = rd.choice(blocks) # 블록 랜덤 선택
+        blockLen = len(randomBlock[0]) # 블록의 행 길이
+        place = int((len(board[0])-blockLen) / 2) # (보드의 행 길이 - 블록의 행 길이) / 2
+        prlDisplace = () # 평행이동 수치
+        for i in range(len(randomBlock)): # 블록의 행 조회
+            for j in range(len(randomBlock[i])): # 블록의 열 조회
+                if randomBlock[i][j] != background:
+                    board[i][j+place] = randomBlock[i][j] # 블록의 각 행을 보드판 위쪽 가운데에 배치
+                    blockPos.append((i, j+place)) # 배치된 행과 열의 번호를 blockPos에 저장
+                    orgBlockPos.append((i, j)) # 원점에 배치했을 때 행과 열의 번호를 orgBlockPos에 저장
+                    if i == len(randomBlock) // 2 and j == len(randomBlock[0]) // 2:
+                        rotateCenterPos = (i, j+place) # 블록의 행의 중심, 열의 중심 위치
+                        prlDisplace = (i, j) # 블록의 첫번째 행의 첫번째 열의 위치와 rotateCenterPos의 거리 차이
+        for i, pos in enumerate(orgBlockPos):
+            orgBlockPos[i] = (pos[0] - prlDisplace[0], pos[1] - prlDisplace[1]) # 블록을 원점에 배치했을 때, prlDisplace 만큼 평행이동하여
+                                                                                # 블록의 회전중심이 원점에 배치되도록 설정
+    else:
+        global playable
+        playable = False
 
 def move_down_block(moveKeyX=False):
     global blockPos
@@ -89,7 +96,7 @@ def move_down_block(moveKeyX=False):
 def input_move_key():
     global blockPos
     global rotateCenterPos
-    moveKey = input("키 입력(a, s, d, z, x): ")
+    moveKey = input("a: 왼쪽, s: 아래, d: 오른쪽, z: 회전, x: 낙하, q: 종료\n키 입력: ")
     movable = True
     if moveKey == "a": # a를 입력했을 경우
         for i in range(len(board)): # 행 조회
@@ -150,6 +157,9 @@ def input_move_key():
                 orgBlockPos[i] = (newRow - rotateCenterPos[0], newCol - rotateCenterPos[1]) # orgBlockPos의 행, 열 번호 수정
             blockPos.sort()
             orgBlockPos.sort()
+    elif moveKey == "q":
+        global playable
+        playable = False
 
 def rotate_block():
     rotatedblockPos = [] # 블록 회전 결과
@@ -169,17 +179,19 @@ def rotate_block():
 
 def reset_line():
     resetCount = 0 # 행 초기화 횟수
-    for i in range(len(board)): # 행 조회
+    for i in range(1, len(board)): # 두번째 행 ~ 마지막 행까지 조회
         if background not in board[i]: # 행 안에 값이 모두 채워져 있으면
             board[i] = [background for i in range(10)] # 행의 모든 값을 배경 타일로 초기화
             resetCount += 1 # 행 초기화 횟수 추가
     if resetCount: # 행 초기화 작업이 이루어 졌다면
+        global score
+        score += resetCount*100
         move_down_line(resetCount) # 모든 행들을 아래로 밀착 시키기 위해 move_down_line 함수에 resetCount만큼 값을 전달하여 호출
     spawn_block() # 밀착이 끝났다면 spawn_block 함수를 호출해 랜덤 블록 생성
 
 def move_down_line(repeat):
     while repeat: # reset_line 함수에서 행 초기화 횟수만큼 수행
-        for i in range(len(board)-1, 0, -1): # 행 조회(아래에서 위로 두번째 행 까지 역순)
+        for i in range(len(board)-1, 1, -1): # 행 조회(아래에서 위로 세번째 행 까지 역순)
             if board[i].count(background) == 10: # 행의 모든 값이 배경 타일이면
                 board[i] = board[i-1] # 위에 행을 현재 행으로 변경
                 board[i-1] = [background for i in range(10)] # 위에 행은 모든 값을 배경 타일로 초기화
@@ -187,3 +199,10 @@ def move_down_line(repeat):
 
 spawn_block()
 update_board()
+
+while playable:
+    input_move_key()
+    print("\n")
+    update_board()
+
+print("Game Over")
