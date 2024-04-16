@@ -26,8 +26,9 @@ blocks = [
     [["⚫", "👻", "⚫"], # ㅗ자 블록
      ["👻", "👻", "👻"]]
     ]
+randomArrange = [] # 7개 블록 순서 랜덤 배열
 score = 0 # 점수
-playable = True
+gameOver = False
 
 def update_board(): # 현재 보드판의 상태 출력
     print("Score: %d" % (score))
@@ -41,25 +42,31 @@ def spawn_block():
         global rotateCenterPos
         blockPos = []
         orgBlockPos = []
-        randomBlock = rd.choice(blocks) # 블록 랜덤 선택
-        blockLen = len(randomBlock[0]) # 블록의 행 길이
+        if not randomArrange:
+            while len(randomArrange) < 7:
+                randomBlock = rd.choice(blocks) # 블록 랜덤 선택
+                if randomBlock not in randomArrange:
+                    randomArrange.append(randomBlock)
+        currentBlock = randomArrange[0]
+        blockLen = len(currentBlock) # 블록의 행 길이
+        randomArrange.remove(randomArrange[0])
         place = int((len(board[0])-blockLen) / 2) # (보드의 행 길이 - 블록의 행 길이) / 2
         prlDisplace = () # 평행이동 수치
-        for i in range(len(randomBlock)): # 블록의 행 조회
-            for j in range(len(randomBlock[i])): # 블록의 열 조회
-                if randomBlock[i][j] != background:
-                    board[i][j+place] = randomBlock[i][j] # 블록의 각 행을 보드판 위쪽 가운데에 배치
+        for i in range(len(currentBlock)): # 블록의 행 조회
+            for j in range(len(currentBlock[i])): # 블록의 열 조회
+                if currentBlock[i][j] != background:
+                    board[i][j+place] = currentBlock[i][j] # 블록의 각 행을 보드판 위쪽 가운데에 배치
                     blockPos.append((i, j+place)) # 배치된 행과 열의 번호를 blockPos에 저장
                     orgBlockPos.append((i, j)) # 원점에 배치했을 때 행과 열의 번호를 orgBlockPos에 저장
-                    if i == len(randomBlock) // 2 and j == len(randomBlock[0]) // 2:
+                    if i == len(currentBlock) // 2 and j == len(currentBlock[0]) // 2:
                         rotateCenterPos = (i, j+place) # 블록의 행의 중심, 열의 중심 위치
                         prlDisplace = (i, j) # 블록의 첫번째 행의 첫번째 열의 위치와 rotateCenterPos의 거리 차이
         for i, pos in enumerate(orgBlockPos):
             orgBlockPos[i] = (pos[0] - prlDisplace[0], pos[1] - prlDisplace[1]) # 블록을 원점에 배치했을 때, prlDisplace 만큼 평행이동하여
                                                                                 # 블록의 회전중심이 원점에 배치되도록 설정
     else:
-        global playable
-        playable = False
+        global gameOver
+        gameOver = True
 
 def move_down_block(moveKeyX=False):
     global blockPos
@@ -158,8 +165,8 @@ def input_move_key():
             blockPos.sort()
             orgBlockPos.sort()
     elif moveKey == "q":
-        global playable
-        playable = False
+        global gameOver
+        gameOver = True
 
 def rotate_block():
     rotatedblockPos = [] # 블록 회전 결과
@@ -200,7 +207,7 @@ def move_down_line(repeat):
 spawn_block()
 update_board()
 
-while playable:
+while not gameOver:
     input_move_key()
     print("\n")
     update_board()
