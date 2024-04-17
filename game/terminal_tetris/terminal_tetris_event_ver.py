@@ -32,6 +32,7 @@ blocks = [
 randomArrange = [] # 7개 블록 순서 랜덤 배열
 score = 0 # 점수
 gameOver = False
+Request_for_update = False
 
 def update_board(): # 현재 보드판의 상태 출력
     print("Score: %d" % (score))
@@ -106,6 +107,7 @@ def move_down_block(moveKeyX=False):
 def input_move_key(key):
     global blockPos
     global rotateCenterPos
+    global Request_for_update
     movable = True
     if key.name == "left": # 왼쪽 키를 입력했을 경우
         for i in range(len(board)): # 행 조회
@@ -169,6 +171,8 @@ def input_move_key(key):
     elif key.name == "q":
         global gameOver
         gameOver = True
+    
+    Request_for_update = True
 
 def rotate_block():
     rotatedblockPos = [] # 블록 회전 결과
@@ -213,23 +217,21 @@ keyList = ["left", "right", "down", "z", "space", "q"]
 for key in keyList:
     keyboard.on_press_key(key, input_move_key)
 
-update_board_coolTime = 0.03
 move_down_coolTime = 1
 lastActionTime = time.time()
-lastActionTime2 = time.time()
 
 while not gameOver:
     currentTime = time.time()
 
-    if currentTime - lastActionTime >= update_board_coolTime:
+    if Request_for_update:
         os.system('cls')
         update_board()
-        lastActionTime = currentTime
-    
-    if currentTime - lastActionTime2 >= move_down_coolTime:
+        Request_for_update = False
+
+    if currentTime - lastActionTime >= move_down_coolTime:
         move_down_block()
         os.system('cls')
         update_board()
-        lastActionTime2 = currentTime
+        lastActionTime = currentTime
 
 print("Game Over")
