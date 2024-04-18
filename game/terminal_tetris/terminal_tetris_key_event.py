@@ -31,10 +31,17 @@ blocks = [
     ]
 randomArrange = [] # 7개 블록 순서 랜덤 배열
 score = 0 # 점수
+gameOver = False
+key_left = False
+key_right = False
+key_down = False
+key_space = False
+key_z = False
 reset = False
 pause = False
-gameOver = False
 Request_for_update = False
+send_input_event = False
+input_processing = False
 
 def update_board(): # 현재 보드판의 상태 출력
     print("Score: %d" % (score))
@@ -77,7 +84,6 @@ def spawn_block():
 def move_down_block(moveKeyX=False):
     global blockPos
     global rotateCenterPos
-    global Request_for_update
     while True:
         movable = True
         for i in range(len(board)-1, -1, -1): # 행 조회(아래에서 위로 역순)
@@ -106,87 +112,36 @@ def move_down_block(moveKeyX=False):
         else: # 이동 불가 상태이면 break
             reset_line() # reset_line 함수를 호출하여 값이 모두 채워진 행이 있는지 검사
             break
-    
-    Request_for_update = True
 
 def input_move_key(key):
-    global pause
-    global blockPos
-    global rotateCenterPos
-    global Request_for_update
-    movable = True
-    if not pause and key.name == "left": # 왼쪽 키를 입력했을 경우
-        for i in range(len(board)): # 행 조회
-            for j in range(len(board[i])): # 열 조회
-                if (i, j) in blockPos: # blockPos가 갖고 있는 행과 열의 번호이면
-                    if j != 0: # 가장 왼쪽 칸이 아니면
-                        if board[i][j-1] != background: # 왼쪽 칸이 배경 타일이 아니면
-                            if (i, j-1) not in blockPos: # 왼쪽 칸이 blockPos가 갖고 있지 않은 행과 열의 번호이면
-                                movable = False # 이동 불가로 변경하고 열 조회 중지
-                                break
-                    else: # 가장 왼쪽 칸이면
-                        movable = False
-                        break
-            if not movable: # 이동 불가 상태이면 행 조회도 중지
-                break
-        if movable: # 이동 가능 상태가 유지 되었으면
-            rotateCenterPos = (rotateCenterPos[0], rotateCenterPos[1]-1) # 회전 중심의 열 번호 -1
-            for i, pos in enumerate(blockPos): # 블록의 행, 열 조회
-                board[pos[0]][pos[1]-1] = board[pos[0]][pos[1]] # 픽셀을 왼쪽으로 한 칸 이동
-                board[pos[0]][pos[1]] = background
-                blockPos[i] = (pos[0], pos[1]-1) # blockPos의 행과 열의 번호를 수정
-    elif not pause and key.name == "right": # 오른쪽 키를 입력했을 경우
-        for i in range(len(board)): # 행 조회
-            for j in range(len(board[i])-1, -1, -1): # 열 조회(역순)
-                if (i, j) in blockPos: # blockPos가 갖고 있는 행과 열의 번호이면
-                    if j != len(board[i])-1: # 가장 오른쪽 칸이 아니면
-                        if board[i][j+1] != background: # 오른쪽 칸이 배경 타일이 아니면
-                            if (i, j+1) not in blockPos: # 오른쪽 칸이 blockPos가 갖고 있지 않은 행과 열의 번호이면
-                                movable = False # 이동 불가로 변경하고 열 조회 중지
-                                break
-                    else: # 가장 오른쪽 칸이면
-                        movable = False
-                        break
-            if not movable: # 이동 불가 상태이면 행 조회도 중지
-                break
-        if movable: # 이동 가능 상태가 유지 되었으면
-            rotateCenterPos = (rotateCenterPos[0], rotateCenterPos[1]+1) # 회전 중심의 열 번호 +1
-            blockPos.reverse() # blockPos의 배열을 역순으로 변경
-            for i, pos in enumerate(blockPos): # 블록의 행, 열 조회
-                board[pos[0]][pos[1]+1] = board[pos[0]][pos[1]] # 픽셀을 오른쪽으로 한 칸 이동
-                board[pos[0]][pos[1]] = background
-                blockPos[i] = (pos[0], pos[1]+1) # blockPos의 행과 열의 번호를 수정
-            blockPos.reverse() # 배열을 역순에서 원래대로 변경
-    elif not pause and key.name == "down": # 아래쪽 키를 입력했을 경우
-        move_down_block() # move_down_block 함수 호출
-    elif not pause and key.name == "space": # 스페이스바를 입력했을 경우
-        move_down_block(moveKeyX=True) # moveKeyX의 기본값을 True로 변경해서 호출
-    elif not pause and key.name == "z": # z를 입력했을 경우
-        rotatedblockPos = rotate_block() # 블록 회전 결과
-        if rotatedblockPos: # 반환값의 리스트가 비어있지 않으면
-            global orgBlockPos
-            for i, pos in enumerate(blockPos): # 블록의 행, 열 조회
-                newRow, newCol = rotatedblockPos[i][0], rotatedblockPos[i][1] # rotatedblockPos의 행, 열 번호
-                board[newRow][newCol] = board[pos[0]][pos[1]] # 행, 열 번호로 픽셀 이동
-                if (pos[0], pos[1]) not in rotatedblockPos: # 픽셀의 행, 열 번호가 rotatedblockPos안에 있지 않으면
-                    board[pos[0]][pos[1]] = background
-                blockPos[i] = (newRow, newCol) # blockPos의 행, 열 번호 수정
-                orgBlockPos[i] = (newRow - rotateCenterPos[0], newCol - rotateCenterPos[1]) # orgBlockPos의 행, 열 번호 수정
-            blockPos.sort()
-            orgBlockPos.sort()
-    elif key.name == "q":
-        global gameOver
-        gameOver = True
-        return
-    elif key.name == "r":
-        global reset
-        reset = True
-        return
-    elif key.name == "p":
-        pause = not pause
-        return
-    
-    Request_for_update = True
+    if not input_processing:
+        global pause
+        if not pause and key.name == "left":
+            global key_left
+            key_left = True
+        elif not pause and key.name == "right":
+            global key_right
+            key_right = True
+        elif not pause and key.name == "down":
+            global key_down
+            key_down = True
+        elif not pause and key.name == "space":
+            global key_space
+            key_space = True
+        elif not pause and key.name == "z":
+            global key_z
+            key_z = True
+        elif key.name == "q":
+            global gameOver
+            gameOver = True
+        elif key.name == "r":
+            global reset
+            reset = True
+        elif key.name == "p":
+            pause = not pause
+        
+        global send_input_event
+        send_input_event = True
 
 def rotate_block():
     rotatedblockPos = [] # 블록 회전 결과
@@ -237,24 +192,95 @@ pastTime = int(time.time())
 while not gameOver:
     if not pause:
         currentTime = int(time.time())
-        if currentTime - pastTime == move_down_coolTime:
+        if currentTime - pastTime >= move_down_coolTime:
             move_down_block()
+            Request_for_update = True
             pastTime = currentTime
 
         if Request_for_update:
             os.system('cls')
             update_board()
             Request_for_update = False
+        
+        if send_input_event:
+            input_processing = True
+            movable = True
+            if key_left: # 왼쪽 키를 입력했을 경우
+                key_left = False
+                for i in range(len(board)): # 행 조회
+                    for j in range(len(board[i])): # 열 조회
+                        if (i, j) in blockPos: # blockPos가 갖고 있는 행과 열의 번호이면
+                            if j != 0: # 가장 왼쪽 칸이 아니면
+                                if board[i][j-1] != background: # 왼쪽 칸이 배경 타일이 아니면
+                                    if (i, j-1) not in blockPos: # 왼쪽 칸이 blockPos가 갖고 있지 않은 행과 열의 번호이면
+                                        movable = False # 이동 불가로 변경하고 열 조회 중지
+                                        break
+                            else: # 가장 왼쪽 칸이면
+                                movable = False
+                                break
+                    if not movable: # 이동 불가 상태이면 행 조회도 중지
+                        break
+                if movable: # 이동 가능 상태가 유지 되었으면
+                    rotateCenterPos = (rotateCenterPos[0], rotateCenterPos[1]-1) # 회전 중심의 열 번호 -1
+                    for i, pos in enumerate(blockPos): # 블록의 행, 열 조회
+                        board[pos[0]][pos[1]-1] = board[pos[0]][pos[1]] # 픽셀을 왼쪽으로 한 칸 이동
+                        board[pos[0]][pos[1]] = background
+                        blockPos[i] = (pos[0], pos[1]-1) # blockPos의 행과 열의 번호를 수정
+            elif key_right: # 오른쪽 키를 입력했을 경우
+                key_right = False
+                for i in range(len(board)): # 행 조회
+                    for j in range(len(board[i])-1, -1, -1): # 열 조회(역순)
+                        if (i, j) in blockPos: # blockPos가 갖고 있는 행과 열의 번호이면
+                            if j != len(board[i])-1: # 가장 오른쪽 칸이 아니면
+                                if board[i][j+1] != background: # 오른쪽 칸이 배경 타일이 아니면
+                                    if (i, j+1) not in blockPos: # 오른쪽 칸이 blockPos가 갖고 있지 않은 행과 열의 번호이면
+                                        movable = False # 이동 불가로 변경하고 열 조회 중지
+                                        break
+                            else: # 가장 오른쪽 칸이면
+                                movable = False
+                                break
+                    if not movable: # 이동 불가 상태이면 행 조회도 중지
+                        break
+                if movable: # 이동 가능 상태가 유지 되었으면
+                    rotateCenterPos = (rotateCenterPos[0], rotateCenterPos[1]+1) # 회전 중심의 열 번호 +1
+                    blockPos.reverse() # blockPos의 배열을 역순으로 변경
+                    for i, pos in enumerate(blockPos): # 블록의 행, 열 조회
+                        board[pos[0]][pos[1]+1] = board[pos[0]][pos[1]] # 픽셀을 오른쪽으로 한 칸 이동
+                        board[pos[0]][pos[1]] = background
+                        blockPos[i] = (pos[0], pos[1]+1) # blockPos의 행과 열의 번호를 수정
+                    blockPos.reverse() # 배열을 역순에서 원래대로 변경
+            elif key_down: # 아래쪽 키를 입력했을 경우
+                key_down = False
+                move_down_block() # move_down_block 함수 호출
+            elif key_space: # 스페이스바를 입력했을 경우
+                key_space = False
+                move_down_block(moveKeyX=True) # moveKeyX의 기본값을 True로 변경해서 호출
+            elif key_z: # z를 입력했을 경우
+                key_z = False
+                rotatedblockPos = rotate_block() # 블록 회전 결과
+                if rotatedblockPos: # 반환값의 리스트가 비어있지 않으면
+                    for i, pos in enumerate(blockPos): # 블록의 행, 열 조회
+                        newRow, newCol = rotatedblockPos[i][0], rotatedblockPos[i][1] # rotatedblockPos의 행, 열 번호
+                        board[newRow][newCol] = board[pos[0]][pos[1]] # 행, 열 번호로 픽셀 이동
+                        if (pos[0], pos[1]) not in rotatedblockPos: # 픽셀의 행, 열 번호가 rotatedblockPos안에 있지 않으면
+                            board[pos[0]][pos[1]] = background
+                        blockPos[i] = (newRow, newCol) # blockPos의 행, 열 번호 수정
+                        orgBlockPos[i] = (newRow - rotateCenterPos[0], newCol - rotateCenterPos[1]) # orgBlockPos의 행, 열 번호 수정
+                    blockPos.sort()
+                    orgBlockPos.sort()
+            
+            Request_for_update = True
+            send_input_event = False
+            input_processing = False
     
     if reset:
         board = [[background for i in range(10)] for j in range(21)]
         randomArrange = []
         score = 0
+        spawn_block()
+        Request_for_update = True
         pause = False
         reset = False
-        spawn_block()
-        lastActionTime = time.time()
-        Request_for_update = True
     time.sleep(0.017)
 
 print("Game Over")
