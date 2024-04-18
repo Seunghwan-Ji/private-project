@@ -31,6 +31,8 @@ blocks = [
     ]
 randomArrange = [] # 7개 블록 순서 랜덤 배열
 score = 0 # 점수
+reset = False
+pause = False
 gameOver = False
 Request_for_update = False
 
@@ -75,6 +77,7 @@ def spawn_block():
 def move_down_block(moveKeyX=False):
     global blockPos
     global rotateCenterPos
+    global Request_for_update
     while True:
         movable = True
         for i in range(len(board)-1, -1, -1): # 행 조회(아래에서 위로 역순)
@@ -103,13 +106,16 @@ def move_down_block(moveKeyX=False):
         else: # 이동 불가 상태이면 break
             reset_line() # reset_line 함수를 호출하여 값이 모두 채워진 행이 있는지 검사
             break
+    
+    Request_for_update = True
 
 def input_move_key(key):
+    global pause
     global blockPos
     global rotateCenterPos
     global Request_for_update
     movable = True
-    if key.name == "left": # 왼쪽 키를 입력했을 경우
+    if not pause and key.name == "left": # 왼쪽 키를 입력했을 경우
         for i in range(len(board)): # 행 조회
             for j in range(len(board[i])): # 열 조회
                 if (i, j) in blockPos: # blockPos가 갖고 있는 행과 열의 번호이면
@@ -129,7 +135,7 @@ def input_move_key(key):
                 board[pos[0]][pos[1]-1] = board[pos[0]][pos[1]] # 픽셀을 왼쪽으로 한 칸 이동
                 board[pos[0]][pos[1]] = background
                 blockPos[i] = (pos[0], pos[1]-1) # blockPos의 행과 열의 번호를 수정
-    elif key.name == "right": # 오른쪽 키를 입력했을 경우
+    elif not pause and key.name == "right": # 오른쪽 키를 입력했을 경우
         for i in range(len(board)): # 행 조회
             for j in range(len(board[i])-1, -1, -1): # 열 조회(역순)
                 if (i, j) in blockPos: # blockPos가 갖고 있는 행과 열의 번호이면
@@ -151,11 +157,11 @@ def input_move_key(key):
                 board[pos[0]][pos[1]] = background
                 blockPos[i] = (pos[0], pos[1]+1) # blockPos의 행과 열의 번호를 수정
             blockPos.reverse() # 배열을 역순에서 원래대로 변경
-    elif key.name == "down": # 아래쪽 키를 입력했을 경우
+    elif not pause and key.name == "down": # 아래쪽 키를 입력했을 경우
         move_down_block() # move_down_block 함수 호출
-    elif key.name == "space": # 스페이스바를 입력했을 경우
+    elif not pause and key.name == "space": # 스페이스바를 입력했을 경우
         move_down_block(moveKeyX=True) # moveKeyX의 기본값을 True로 변경해서 호출
-    elif key.name == "z": # z를 입력했을 경우
+    elif not pause and key.name == "z": # z를 입력했을 경우
         rotatedblockPos = rotate_block() # 블록 회전 결과
         if rotatedblockPos: # 반환값의 리스트가 비어있지 않으면
             global orgBlockPos
@@ -171,6 +177,14 @@ def input_move_key(key):
     elif key.name == "q":
         global gameOver
         gameOver = True
+        return
+    elif key.name == "r":
+        global reset
+        reset = True
+        return
+    elif key.name == "p":
+        pause = not pause
+        return
     
     Request_for_update = True
 
@@ -213,7 +227,7 @@ def move_down_line(repeat):
 spawn_block()
 update_board()
 
-keyList = ["left", "right", "down", "z", "space", "q"]
+keyList = ["left", "right", "down", "z", "space", "q", "r", "p"]
 for key in keyList:
     keyboard.on_press_key(key, input_move_key)
 
@@ -221,17 +235,25 @@ move_down_coolTime = 1
 lastActionTime = time.time()
 
 while not gameOver:
-    currentTime = time.time()
+    if not pause:
+        currentTime = time.time()
+        if currentTime - lastActionTime >= move_down_coolTime:
+            move_down_block()
+            lastActionTime = currentTime
 
     if Request_for_update:
         os.system('cls')
         update_board()
         Request_for_update = False
-
-    if currentTime - lastActionTime >= move_down_coolTime:
-        move_down_block()
-        os.system('cls')
-        update_board()
-        lastActionTime = currentTime
+    
+    if reset:
+        board = [[background for i in range(10)] for j in range(21)]
+        randomArrange = []
+        score = 0
+        pause = False
+        reset = False
+        spawn_block()
+        lastActionTime = time.time()
+        Request_for_update = True
 
 print("Game Over")
