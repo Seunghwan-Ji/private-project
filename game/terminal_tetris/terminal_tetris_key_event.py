@@ -44,9 +44,10 @@ send_input_event = False
 input_processing = False
 
 def update_board(): # 현재 보드판의 상태 출력
-    print("Score: %d" % (score))
+    print("\n")
     for i in board[1:]:
         print(*i)
+    print("Score: %d" % (score))
 
 def spawn_block():
     if board[0].count(background) == 10: # 블록이 쌓인 칸 수가 20을 초과하지 않았으면
@@ -135,10 +136,13 @@ def input_move_key(key):
             global gameOver
             gameOver = True
         elif key.name == "r":
+            print("다시 시작")
             global reset
             reset = True
         elif key.name == "p":
             pause = not pause
+            if pause:
+                print("게임 일시중지")
         
         global send_input_event
         send_input_event = True
@@ -274,6 +278,7 @@ while not gameOver:
             input_processing = False
     
     if reset:
+        input_processing = True
         board = [[background for i in range(10)] for j in range(21)]
         randomArrange = []
         score = 0
@@ -281,6 +286,8 @@ while not gameOver:
         Request_for_update = True
         pause = False
         reset = False
+        time.sleep(1)
+        input_processing = False
     time.sleep(0.017)
 
 print("Game Over")
