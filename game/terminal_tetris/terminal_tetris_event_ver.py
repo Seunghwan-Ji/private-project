@@ -232,19 +232,19 @@ for key in keyList:
     keyboard.on_press_key(key, input_move_key)
 
 move_down_coolTime = 1
-lastActionTime = time.time()
+pastTime = int(time.time())
 
 while not gameOver:
     if not pause:
-        currentTime = time.time()
-        if currentTime - lastActionTime >= move_down_coolTime:
+        currentTime = int(time.time())
+        if currentTime - pastTime == move_down_coolTime:
             move_down_block()
-            lastActionTime = currentTime
+            pastTime = currentTime
 
-    if Request_for_update:
-        os.system('cls')
-        update_board()
-        Request_for_update = False
+        if Request_for_update:
+            os.system('cls')
+            update_board()
+            Request_for_update = False
     
     if reset:
         board = [[background for i in range(10)] for j in range(21)]
@@ -255,5 +255,6 @@ while not gameOver:
         spawn_block()
         lastActionTime = time.time()
         Request_for_update = True
+    time.sleep(0.017)
 
 print("Game Over")
