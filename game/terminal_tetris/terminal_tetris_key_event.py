@@ -185,7 +185,19 @@ def rotate_block(): # 블록 회전
                     break
             rotatedblockPos.append((rotateRow, rotateCol)) # break가 안 걸렸으면 행, 열 번호 추가
         else: # 벗어나면
-            rotatedblockPos = [] # 리스트를 비우고 중지
+            rotatedblockPos = []
+            if rotateRow < 0:
+                move_block_down()
+                rotate_block()
+                return
+            elif rotateCol < 0:
+                move_block_right()
+                rotate_block()
+                return
+            elif rotateCol > len(board[0])-1:
+                move_block_left()
+                rotate_block()
+                return
             break
     
     if rotatedblockPos: # 리스트가 비어있지 않으면
