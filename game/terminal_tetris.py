@@ -5,33 +5,33 @@ import time
 import os
 
 backgroundTile = "⚫" # 배경 타일
-board = [[backgroundTile for i in range(10)] for j in range(21)] # 10 X 21 보드판 생성
-blockPos = [] # 블록의 각 픽셀이 위치하는 행과 열의 번호
-orgBlockPos = [] # 블록을 원점에 배치했을 때 각 픽셀이 위치하는 행과 열의 번호
-rotateCenterPos = () # 블록의 회전 중심이 되는 행과 열의 번호
-silhouettePos = []
-blocks = [
-    [["🛸", "🛸"], # 정사각형 블록
+board = [[backgroundTile for _ in range(10)] for _ in range(21)] # 10 X 21 보드판 생성
+blockPos = [] # 블록의 각 픽셀이 위치하는 행, 열 번호
+orgBlockPos = [] # 블록을 원점에 배치했을 때 각 픽셀이 위치하는 행, 열 번호
+rotateCenterPos = () # 블록의 회전 중심이 되는 행, 열 번호
+silhouettePos = [] # 실루엣의 각 픽셀이 위치하는 행, 열 번호
+blocks = [ # 블록 모양 종류
+    [["🛸", "🛸"],
      ["🛸", "🛸"]],
     
-    [["🚀", "🚀", "🚀", "🚀"]], # 일자 블록
+    [["🚀", "🚀", "🚀", "🚀"]],
     
-    [["👾", "👾", "⚫"], # Z블록
+    [["👾", "👾", "⚫"],
      ["⚫", "👾", "👾"]],
     
-    [["⚫", "👻", "👻"], # Z블록 반전
+    [["⚫", "👻", "👻"],
      ["👻", "👻", "⚫"]],
     
-    [["👽", "⚫", "⚫"], # ㄴ자 블록
+    [["👽", "⚫", "⚫"],
      ["👽", "👽", "👽"]],
     
-    [["⚫", "⚫", "🤖"], # ㄴ자 블록 반전
+    [["⚫", "⚫", "🤖"],
      ["🤖", "🤖", "🤖"]],
 
-    [["⚫", "🪐", "⚫"], # ㅗ자 블록
+    [["⚫", "🪐", "⚫"],
      ["🪐", "🪐", "🪐"]]
     ]
-silhouetteTile = "🌕"
+silhouetteTile = "🌕" # 실루엣 타일
 randomArrange = [] # 7개 블록 순서 랜덤 배열
 score = 0 # 점수
 gameOver = False
@@ -40,11 +40,11 @@ key_right = False
 key_down = False
 key_space = False
 key_z = False
-reset = False
-pause = False
-Request_update_board = True
-request_key_process = False
-key_processing = False
+reset = False # 재시작
+pause = False # 일시 중지
+Request_update_board = False # 보드 업데이트 요청
+request_key_process = False # 키 처리 요청
+key_processing = False # 키 처리중
 
 def update_board(): # 현재 보드판의 상태 출력
     board_gui = "Score: %d" % (score)
@@ -61,7 +61,7 @@ def spawn_block(): # 블록 생성
         orgBlockPos = []
         if not randomArrange:
             while len(randomArrange) < 7:
-                randomBlock = rd.choice(blocks) # 블록 랜덤 선택
+                randomBlock = rd.choice(blocks) # 블록 모양 랜덤 선택
                 if randomBlock not in randomArrange:
                     randomArrange.append(randomBlock)
         currentBlock = randomArrange[0]
@@ -90,8 +90,8 @@ def move_block_down(moveKeyX=False): # 블록 아래로 이동
     global blockPos
     global rotateCenterPos
     while True:
-        copy_board = deepcopy(board)
-        copy_blockPos = deepcopy(blockPos)
+        copy_board = deepcopy(board) # 현재 보드판 상태 복사
+        copy_blockPos = deepcopy(blockPos) # 현재 블록 위치 정보 복사
         movable = True
         for i, pos in enumerate(blockPos):
             row, col = pos[0], pos[1]
@@ -111,7 +111,7 @@ def move_block_down(moveKeyX=False): # 블록 아래로 이동
         
         if movable: # 이동 가능 상태가 유지 되었으면
             rotateCenterPos = (rotateCenterPos[0]+1, rotateCenterPos[1]) # 회전 중심의 행 번호 +1
-            board = copy_board
+            board = copy_board # 복사본의 변경사항을 적용
             blockPos = copy_blockPos
             if not moveKeyX: # 사용자가 x키를 누르지 않았으면 break
                 break
@@ -141,8 +141,8 @@ def move_block_left(): # 블록 왼쪽으로 이동
             movable = False
             break
 
-    if movable: # 이동 가능 상태가 유지 되었으면
-        rotateCenterPos = (rotateCenterPos[0], rotateCenterPos[1]-1) # 회전 중심의 열 번호 -1
+    if movable:
+        rotateCenterPos = (rotateCenterPos[0], rotateCenterPos[1]-1)
         board = copy_board
         blockPos = copy_blockPos
 
@@ -155,7 +155,7 @@ def move_block_right(): # 블록 오른쪽으로 이동
     movable = True
     for i, pos in enumerate(blockPos):
         row, col = pos[0], pos[1]
-        if col != len(board[i])-1:
+        if col != len(board[i])-1: # 가장 오른쪽 칸이 아니면
             if board[row][col+1] == backgroundTile or (row, col+1) in blockPos:
                 copy_blockPos[i] = (row, col+1)
                 copy_board[row][col+1] = board[row][col]
@@ -164,7 +164,7 @@ def move_block_right(): # 블록 오른쪽으로 이동
             else:
                 movable = False
                 break
-        else:
+        else: # 가장 오른쪽 칸이면
             movable = False
             break
     
@@ -186,26 +186,26 @@ def rotate_block(): # 블록 회전
             rotatedblockPos.append((rotateRow, rotateCol)) # break가 안 걸렸으면 행, 열 번호 추가
         else: # 벗어나면
             rotatedblockPos = []
-            if rotateRow < 0:
+            if rotateRow < 0: # 천장 이탈
                 move_block_down()
-                rotate_block()
+                rotate_block() # 아래로 한 칸 이동 후 재귀
                 return
-            elif rotateCol < 0:
+            elif rotateCol < 0: # 왼쪽벽 이탈
                 move_block_right()
-                rotate_block()
+                rotate_block() # 오른쪽으로 한 칸 이동 후 재귀
                 return
-            elif rotateCol > len(board[0])-1:
+            elif rotateCol > len(board[0])-1: # 오른쪽 벽 이탈
                 move_block_left()
-                rotate_block()
+                rotate_block() # 왼쪽으로 한 칸 이동 후 재귀
                 return
             break
     
     if rotatedblockPos: # 리스트가 비어있지 않으면
-        for i, pos in enumerate(blockPos): # 블록의 행, 열 조회
+        for i, pos in enumerate(blockPos): # 블록의 행, 열 번호 조회
             newRow, newCol = rotatedblockPos[i][0], rotatedblockPos[i][1] # rotatedblockPos의 행, 열 번호
             board[newRow][newCol] = board[pos[0]][pos[1]] # 행, 열 번호로 픽셀 이동
             if (pos[0], pos[1]) not in rotatedblockPos: # 픽셀의 행, 열 번호가 rotatedblockPos안에 있지 않으면
-                board[pos[0]][pos[1]] = backgroundTile
+                board[pos[0]][pos[1]] = backgroundTile # 픽셀의 이전 위치의 값은 배경 타일로 변경
             blockPos[i] = (newRow, newCol) # blockPos의 행, 열 번호 수정
             orgBlockPos[i] = (newRow - rotateCenterPos[0], newCol - rotateCenterPos[1]) # orgBlockPos의 행, 열 번호 수정
         blockPos.sort()
@@ -219,9 +219,9 @@ def reset_row(): # 채워진 행 초기화
             resetCount += 1 # 행 초기화 횟수 추가
     if resetCount: # 행 초기화 작업이 이루어 졌다면
         global score
-        score += resetCount*100
+        score += resetCount*100 # 점수 부여
         move_row_down(resetCount) # 모든 행들을 아래로 밀착 시키기 위해 move_row_down 함수에 resetCount만큼 값을 전달하여 호출
-    spawn_block() # spawn_block 함수를 호출해 랜덤 블록 생성
+    spawn_block() # spawn_block 함수를 호출해 다음 블록 생성
 
 def move_row_down(repeat): # 행 아래로 이동
     while repeat: # reset_row 함수에서 행 초기화 횟수만큼 수행
@@ -233,15 +233,15 @@ def move_row_down(repeat): # 행 아래로 이동
 
 def mark_silhouette(): # 블록 실루엣 표시
     global silhouettePos
-    for pos in silhouettePos:
+    for pos in silhouettePos: # 실루엣의 행, 열 번호 조회
         row, col = pos[0], pos[1]
-        if board[row][col] == silhouetteTile:
-            board[row][col] = backgroundTile
-    silhouettePos = deepcopy(blockPos)
+        if board[row][col] == silhouetteTile: # 실루엣 타일이면
+            board[row][col] = backgroundTile # 배경 타일로 변경
+    silhouettePos = deepcopy(blockPos) # 현재 블록 위치 정보 복사
     while True:
-        copy_silhouettePos = deepcopy(silhouettePos)
+        copy_silhouettePos = deepcopy(silhouettePos) # 현재 실루엣 위치 정보 복사
         movable = True
-        for i, pos in enumerate(silhouettePos):
+        for i, pos in enumerate(silhouettePos): # 실루엣의 행, 열 번호 조회
             row, col = pos[0], pos[1]
             if row != len(board)-1: # 보드의 마지막 행 번호가 아니면
                 lowerSpace = board[row+1][col]
@@ -255,94 +255,94 @@ def mark_silhouette(): # 블록 실루엣 표시
                 break
         
         if movable: # 이동 가능 상태가 유지 되었으면
-            silhouettePos = copy_silhouettePos
-        else: # 이동 불가 상태이면 break
-            for pos in silhouettePos:
+            silhouettePos = copy_silhouettePos # 복사본의 변경사항을 적용
+        else:
+            for pos in silhouettePos: # 변경사항이 적용된 실루엣의 행, 열 번호 조회
                 row, col = pos[0], pos[1]
-                if board[row][col] == backgroundTile:
-                    board[row][col] = silhouetteTile
+                if board[row][col] == backgroundTile: # 배경 타일이면
+                    board[row][col] = silhouetteTile # 실루엣 타일로 변경
             break
 
-def handle_key_event(key):
-    if not key_processing:
+def handle_key_event(key): # 키 이벤트 관리
+    if not key_processing: # 키 처리중이 아니면
         global pause
         if not pause and key.name == "left":
             global key_left
-            key_left = True
+            key_left = True # 왼쪽 이동 기능 활성화
         elif not pause and key.name == "right":
             global key_right
-            key_right = True
+            key_right = True # 오른쪽 이동 기능 활성화
         elif not pause and key.name == "down":
             global key_down
-            key_down = True
+            key_down = True # 아래쪽 이동 기능 활성화
         elif not pause and key.name == "space":
             global key_space
-            key_space = True
-        elif not pause and key.name == "z":
+            key_space = True # 빠른 낙하 기능 활성화
+        elif not pause and key.name == "z": # z키
             global key_z
-            key_z = True
+            key_z = True # 회전 기능 활성화
         elif key.name == "f1":
-            pause = not pause
+            pause = not pause # 일시 중지/재개
             if pause:
                 print("Pause")
         elif key.name == "f2":
             print("Restarting...")
             global reset
-            reset = True
+            reset = True # 재시작
         elif key.name == "f3":
             global gameOver
-            gameOver = True
+            gameOver = True # 종료
         
         global request_key_process
-        request_key_process = True
+        request_key_process = True # 키 처리 요청
 
-keyList = ["left", "right", "down", "z", "space", "f1", "f2", "f3"]
+keyList = ["left", "right", "down", "z", "space", "f1", "f2", "f3"] # 키 종류
 for key in keyList:
-    keyboard.on_press_key(key, handle_key_event)
+    keyboard.on_press_key(key, handle_key_event) # 위 키들을 누르면 handle_key_event 함수 호출
 
 spawn_block()
 
-move_down_coolTime = 1
-pastTime = int(time.time())
+move_down_coolTime = 1 # 블록 아래로 자동 이동 쿨타임
+pastTime = int(time.time()) # 과거 시간
 
 while not gameOver:
-    if not pause:
-        currentTime = int(time.time())
-        if currentTime - pastTime >= move_down_coolTime:
+    if not pause: # 일시 중지 상태가 아니면
+        currentTime = int(time.time()) # 현재 시간
+        if currentTime - pastTime >= move_down_coolTime: # (현재 시간 - 과거 시간)이 쿨타임 이상이면
             move_block_down()
             Request_update_board = True
             pastTime = currentTime
 
-        if Request_update_board:
-            os.system('cls')
+        if Request_update_board: # 보드 업데이트 요청 처리
+            os.system('cls') # 이전 출력 모두 삭제
             mark_silhouette()
             update_board()
             Request_update_board = False
         
-        if request_key_process:
-            key_processing = True
-            if key_left: # 왼쪽 키를 입력했을 경우
+        if request_key_process: # 키 처리 요청 처리
+            key_processing = True # 키 처리중
+            if key_left:
                 move_block_left()
                 key_left = False
-            elif key_right: # 오른쪽 키를 입력했을 경우
+            elif key_right:
                 move_block_right()
                 key_right = False
-            elif key_down: # 아래쪽 키를 입력했을 경우
-                move_block_down() # move_block_down 함수 호출
+            elif key_down:
+                move_block_down()
                 key_down = False
-            elif key_space: # 스페이스바를 입력했을 경우
+            elif key_space:
                 move_block_down(moveKeyX=True) # moveKeyX의 기본값을 True로 변경해서 호출
                 key_space = False
-            elif key_z: # z를 입력했을 경우
+            elif key_z:
                 rotate_block()
                 key_z = False
             Request_update_board = True
             request_key_process = False
-            key_processing = False
+            key_processing = False # 키 처리 끝남
     
-    if reset:
+    if reset: # 초기화 작업(재시작)
         key_processing = True
-        board = [[backgroundTile for i in range(10)] for j in range(21)]
+        board = [[backgroundTile for _ in range(10)] for _ in range(21)]
         randomArrange = []
         score = 0
         spawn_block()
@@ -351,6 +351,7 @@ while not gameOver:
         reset = False
         time.sleep(1)
         key_processing = False
-    time.sleep(0.017)
+    
+    time.sleep(0.017) # 루프 속도
 
 print("Game Over")
