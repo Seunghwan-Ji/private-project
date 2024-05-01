@@ -42,7 +42,7 @@ key_space = False
 key_z = False
 reset = False # 재시작
 pause = False # 일시 중지
-Request_update_board = False # 보드 업데이트 요청
+request_update_board = False # 보드 업데이트 요청
 request_key_process = False # 키 처리 요청
 key_processing = False # 키 처리중
 
@@ -310,14 +310,14 @@ while not gameOver:
         currentTime = int(time.time()) # 현재 시간
         if currentTime - pastTime >= move_down_coolTime: # (현재 시간 - 과거 시간)이 쿨타임 이상이면
             move_block_down()
-            Request_update_board = True
+            request_update_board = True
             pastTime = currentTime
 
-        if Request_update_board: # 보드 업데이트 요청 처리
+        if request_update_board: # 보드 업데이트 요청 처리
             os.system('cls') # 이전 출력 모두 삭제
             mark_silhouette()
             update_board()
-            Request_update_board = False
+            request_update_board = False
         
         if request_key_process: # 키 처리 요청 처리
             key_processing = True # 키 처리중
@@ -336,7 +336,7 @@ while not gameOver:
             elif key_z:
                 rotate_block()
                 key_z = False
-            Request_update_board = True
+            request_update_board = True
             request_key_process = False
             key_processing = False # 키 처리 끝남
     
@@ -346,7 +346,7 @@ while not gameOver:
         randomArrange = []
         score = 0
         spawn_block()
-        Request_update_board = True
+        request_update_board = True
         pause = False
         reset = False
         time.sleep(1)
