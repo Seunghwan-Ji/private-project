@@ -189,15 +189,12 @@ def rotate_block(): # 블록 회전
             if rotateRow < 0: # 천장 이탈
                 move_block_down()
                 rotate_block() # 아래로 한 칸 이동 후 재귀
-                return
             elif rotateCol < 0: # 왼쪽벽 이탈
                 move_block_right()
                 rotate_block() # 오른쪽으로 한 칸 이동 후 재귀
-                return
             elif rotateCol > len(board[0])-1: # 오른쪽 벽 이탈
                 move_block_left()
                 rotate_block() # 왼쪽으로 한 칸 이동 후 재귀
-                return
             break
     
     if rotatedblockPos: # 리스트가 비어있지 않으면
