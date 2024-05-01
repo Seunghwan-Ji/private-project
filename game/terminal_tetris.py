@@ -1,8 +1,8 @@
-import random as rd # 블록을 랜덤으로 뽑기 위해서 사용하는 모듈
-from copy import deepcopy
-import keyboard
-import time
-import os
+import random as rd # 블록 모양을 랜덤으로 뽑는 용도
+from copy import deepcopy # 값을 복사하여 복사본을 수정 후 원본에 덮어 씌우는 용도
+import keyboard # 키 이벤트 처리 용도
+import time # 루프 속도, 기능의 쿨타임 관리 용도
+import os # 이전 출력 제거하는 용도
 
 backgroundTile = "⚫" # 배경 타일
 board = [[backgroundTile for _ in range(10)] for _ in range(21)] # 10 X 21 보드판 생성
@@ -314,7 +314,7 @@ while not gameOver:
             pastTime = currentTime
 
         if request_update_board: # 보드 업데이트 요청 처리
-            os.system('cls') # 이전 출력 모두 삭제
+            os.system('cls') # 이전 출력 모두 제거
             mark_silhouette()
             update_board()
             request_update_board = False
