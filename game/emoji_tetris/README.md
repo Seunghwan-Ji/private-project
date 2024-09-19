@@ -4,10 +4,10 @@
 - 참여인원: 1명 (개인 프로젝트)
 - 개발 환경: Python, Visual Studio Code, Git, GitHub
 - 내용: 이모지 텍스트를 블록으로 표현한 테트리스 게임
-- 제작하게된 계기: 최초의 테트리스 개발자의 일화가 담긴 영화 '테트리스'를 보며, 나도 그래픽을 사용하지 않고 텍스트 출력만을 사용하여 구현해 보기로 함
+- 제작하게된 계기: 최초의 테트리스 개발자의 일화가 담긴 영화 '테트리스'를 보며, 그래픽을 사용하지 않고 텍스트 출력만을 사용하여 구현해 보기로 함
 - 핵심기능: 블록의 생성, 이동, 회전, 낙하지점 표시. 블록이 모두 채워진 행 초기화 및 밀착
 - 링크:
-  - GitHub: https://github.com/Seunghwan-Ji/private-project/blob/master/game/terminal_tetris.py
+  - GitHub: https://github.com/Seunghwan-Ji/private-project/tree/master/game/emoji_tetris
   - 플레이 영상: https://youtube.com/shorts/RvTi-WdkH_E?feature=shared
 
 # 목차
