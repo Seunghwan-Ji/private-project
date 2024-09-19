@@ -1,7 +1,7 @@
 import random as rd # 블록 모양을 랜덤으로 뽑는 용도
 from copy import deepcopy # 값을 복사하여 복사본을 수정 후 원본에 덮어 씌우는 용도
-import keyboard # 키 이벤트 처리 용도
-import time # 루프 속도, 기능의 쿨타임 관리 용도
+import keyboard # 키 입력 이벤트 처리 용도
+import time # 메인 루프문 속도, 기능의 쿨타임 관리 용도
 import os # 이전 출력 제거하는 용도
 
 backgroundTile = "⚫" # 배경 타일
@@ -85,7 +85,7 @@ def spawn_block(): # 블록 생성
         global gameOver
         gameOver = True
 
-def move_block_down(moveKeyX=False): # 블록 아래로 이동
+def move_block_down(inputKeySpace=False): # 블록 아래로 이동
     global board
     global blockPos
     global rotateCenterPos
@@ -113,7 +113,7 @@ def move_block_down(moveKeyX=False): # 블록 아래로 이동
             rotateCenterPos = (rotateCenterPos[0]+1, rotateCenterPos[1]) # 회전 중심의 행 번호 +1
             board = copy_board # 복사본의 변경사항을 적용
             blockPos = copy_blockPos
-            if not moveKeyX: # 사용자가 x키를 누르지 않았으면 break
+            if not inputKeySpace: # 사용자가 스페이스바를 누르지 않았으면 break
                 break
         else: # 이동 불가 상태이면 break
             reset_row() # reset_row 함수를 호출하여 값이 모두 채워진 행이 있는지 검사
@@ -176,6 +176,7 @@ def move_block_right(): # 블록 오른쪽으로 이동
 def rotate_block(): # 블록 회전
     rotatedblockPos = [] # 블록 회전 결과
     for pos in orgBlockPos: # 원점 배열 조회
+        # 원점에서 회전 후 다시 원래 위치로 평행이동
         rotateRow = pos[1] + rotateCenterPos[0] # 회전했을 때 행 번호
         rotateCol = -pos[0] + rotateCenterPos[1] # 회전했을 때 열 번호
         if 0 <= rotateRow <= len(board)-1 and 0 <= rotateCol <= len(board[0])-1: # 행, 열 번호가 보드판을 벗어나지 않으면
@@ -228,7 +229,7 @@ def move_row_down(repeat): # 행 아래로 이동
                 board[i-1] = [backgroundTile for i in range(10)] # 위에 행은 모든 값을 배경 타일로 초기화
         repeat -= 1 # 수행이 끝날 때마다 횟수 차감
 
-def mark_silhouette(): # 블록 실루엣 표시
+def mark_silhouette(): # 블록 낙하지점 표시 (실루엣)
     global silhouettePos
     for pos in silhouettePos: # 실루엣의 행, 열 번호 조회
         row, col = pos[0], pos[1]
@@ -328,7 +329,7 @@ while not gameOver:
                 move_block_down()
                 key_down = False
             elif key_space:
-                move_block_down(moveKeyX=True) # moveKeyX의 기본값을 True로 변경해서 호출
+                move_block_down(inputKeySpace=True) # inputKeySpace의 기본값을 True로 변경해서 호출
                 key_space = False
             elif key_z:
                 rotate_block()
