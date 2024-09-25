@@ -67,7 +67,7 @@ def spawn_block(): # 블록 생성
         currentBlock = randomArrange[0]
         blockLen = len(currentBlock) # 블록의 행 길이
         randomArrange.remove(randomArrange[0])
-        place = int((len(board[0])-blockLen) / 2) # (보드의 행 길이 - 블록의 행 길이) / 2
+        place = int((len(board[0])-blockLen) / 2) # (보드의 열 길이 - 블록의 행 길이) / 2
         prlDisplace = () # 평행이동 수치
         for i in range(len(currentBlock)): # 블록의 행 조회
             for j in range(len(currentBlock[i])): # 블록의 열 조회
@@ -75,7 +75,7 @@ def spawn_block(): # 블록 생성
                     board[i][j+place] = currentBlock[i][j] # 블록의 각 행을 보드판 위쪽 가운데에 배치
                     blockPos.append((i, j+place)) # 배치된 행, 열 번호를 blockPos에 저장
                     orgBlockPos.append((i, j)) # 원점에 배치했을 때 행, 열 번호를 orgBlockPos에 저장
-                    if i == len(currentBlock) // 2 and j == len(currentBlock[0]) // 2:
+                    if i == len(currentBlock) // 2 and j == len(currentBlock[0]) // 2: # 회전중심 결정
                         rotateCenterPos = (i, j+place) # 보드에서 회전중심이 위치하는 행, 열 번호
                         prlDisplace = (i, j) # 원점에 배치했을 때 원점과 회전중심의 거리차이
         for i, pos in enumerate(orgBlockPos):
